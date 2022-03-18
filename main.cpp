@@ -2,42 +2,23 @@
 #include <unistd.h>
 #include <vector>
 #include "Point.cpp"
+#include "Printer.cpp"
+#include "Block.cpp"
 using namespace std;
 
-#define DELAY 30000
-
-void printBoard(int max_x, int max_y)
-{
-	for (int y = 0; y <= max_y; y++)
-	{
-		mvprintw(0, y, "#");
-		mvprintw(max_x, y, "#");
-	}
-
-	for (int x = 0; x < max_x; x++)
-	{
-		mvprintw(x, 0, "#");
-		mvprintw(x, max_y, "#");
-	}
-}
-
-void printPoints(vector<Point *> points)
-{
-	srand(time(NULL));
-	for (Point *point : points)
-	{
-		point->refresh();
-		mvprintw(point->x, point->y, "o");
-	}
-}
+#define DELAY 100000
 
 int main(int argc, char *argv[])
 {
-	int max_x = 15;
-	int max_y = 30;
+	srand(time(NULL));
+	int max_x = 20;
+	int max_y = 40;
+	Printer *printer = new Printer(max_x, max_y);
 	vector<Point *> points;
+	Block *block = new Block(5, 5, 10, 5, max_x, max_y);
+
 	for (int i = 0; i < 10; i++)
-		points.push_back(new Point(max_x / 2, max_y / 2, Direction::S, max_x, max_y));
+		points.push_back(new Point(max_x / 2, max_y / 2, Generator::randomBottomDirection(7, 0), max_x, max_y));
 
 	initscr();
 	noecho();
@@ -45,12 +26,20 @@ int main(int argc, char *argv[])
 
 	while (1)
 	{
+		for (Point *point : points)
+			point->refresh();
+		block->refresh();
+		
 		clear();
-		printBoard(max_x, max_y);
-		printPoints(points);
+		printer->printFrame(points, block);
 		refresh();
 		usleep(DELAY);
 	}
+
 	endwin();
 	return 0;
+}
+
+void refreshBlock(Block *block)
+{
 }
