@@ -17,6 +17,8 @@ class Point
 private:
     int max_x;
     int max_y;
+    int bounce;
+    int speed;
     Direction dir;
     ~Point();
     void checkColision();
@@ -26,6 +28,8 @@ public:
     int x;
     int y;
     Point();
-    Point(int x, int y, Direction dir, int max_x, int max_y);
+    Point(int x, int y, Direction dir, int max_x, int max_y, int speed);
     void refresh();
+    void *run(void);
+    static void *run_helper(void *context);
 };
