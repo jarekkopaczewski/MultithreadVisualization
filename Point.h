@@ -18,7 +18,7 @@ private:
     int max_x;
     int max_y;
     int bounce;
-    int speed;
+    int delay;
     Direction dir;
     ~Point();
     void checkColision();
@@ -27,9 +27,9 @@ private:
 public:
     int x;
     int y;
+    char symbol;
     Point();
-    Point(int x, int y, Direction dir, int max_x, int max_y, int speed);
+    Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char symbol);
     void refresh();
-    void *run(void);
-    static void *run_helper(void *context);
+    void run();
 };

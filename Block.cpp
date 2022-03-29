@@ -13,17 +13,13 @@ Block::Block(int x, int y, int width, int height, int max_x, int max_y)
     this->dir = Direction::N;
 }
 
-void Block::refresh()
+void Block::run()
 {
-    if (counter == delay)
+    while (1)
     {
         this->checkColision();
         this->calcCords();
-        counter = 0;
-    }
-    else
-    {
-        counter++;
+        usleep(100000*delay);
     }
 }
 
@@ -47,13 +43,11 @@ void Block::checkColision()
     if (x + height == max_x - 1)
     {
         dir = Direction::N;
-        delay = (rand() % 10 + 0);
-        counter = 0;
+        delay = (rand() % 10 + 2);
     }
     else if (x == 1)
     {
         dir = Direction::S;
-        delay = (rand() % 10 + 0);
-        counter = 0;
+        delay = (rand() % 10 + 2);
     }
 }

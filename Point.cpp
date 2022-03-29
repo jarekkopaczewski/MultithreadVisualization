@@ -11,7 +11,7 @@ Point::~Point()
 {
 }
 
-Point::Point(int x, int y, Direction dir, int max_x, int max_y, int speed)
+Point::Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char symbol)
 {
     this->x = x;
     this->y = y;
@@ -19,25 +19,17 @@ Point::Point(int x, int y, Direction dir, int max_x, int max_y, int speed)
     this->max_x = max_x;
     this->max_y = max_y;
     this->bounce = 0;
-    this->speed = speed;
+    this->delay = delay;
+    this->symbol = symbol;
 }
 
-void *Point::run(void)
+void Point::run()
 {
-    pthread_detach(pthread_self());
-
-    do
+    while (bounce != 5)
     {
         refresh();
-        sleep(speed);
-    } while (bounce != 5);
-
-    pthread_exit(NULL);
-}
-
-static void *Point::run_helper(void *context)
-{
-    return ((Point *)context)->run();
+        usleep(50000 * delay);
+    }
 }
 
 void Point::refresh()
@@ -48,25 +40,21 @@ void Point::refresh()
 
 void Point::checkColision()
 {
-    // dol
-    if (x == max_x - 1)
+    if (x == max_x - 1) // dol
     {
         dir = Generator::randomBottomDirection(2, 0);
         bounce++;
     }
-    // lewa sciana
-    else if (y == 1)
+    else if (y == 1) // lewa sciana
     {
         dir = Generator::randomDirection(3, 1);
         bounce++;
     }
-    // prawa sciana
-    else if (y == max_y - 1)
+    else if (y == max_y - 1) // prawa sciana
     {
         dir = Generator::randomDirection(3, 5);
         bounce++;
     }
-    // gora
     else if (x == 1)
     {
         dir = Generator::randomDirection(3, 3);

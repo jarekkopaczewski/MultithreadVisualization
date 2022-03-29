@@ -46,5 +46,5 @@ void Printer::printBlock(Block *block)
 void Printer::printPoints(vector<Point *> points)
 {
     for (Point *point : points)
-        mvprintw(point->x, point->y, "o");
+        mvprintw(point->x, point->y, "%c", point->symbol);
 }
