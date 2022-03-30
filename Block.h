@@ -15,5 +15,5 @@ public:
     Block(int x, int y, int width, int height, int max_x, int max_y);
     void calcCords();
     void checkColision();
-    void run();
+    void run(int *status);
 };

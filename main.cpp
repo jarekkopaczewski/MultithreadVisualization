@@ -23,9 +23,9 @@ void pointThreadRun(Point *point, int threadId)
 	pthread_exit(0);
 }
 
-void blockThreadRun(Block *block)
+void blockThreadRun(Block *block, int *status)
 {
-	block->run();
+	block->run(status);
 	pthread_exit(0);
 }
 
@@ -33,11 +33,10 @@ int main(int argc, char *argv[])
 {
 	srand(time(NULL));
 	char symbolCounter = 'a';
-	int max_x = 20;
-	int max_y = 40;
+	int max_x = 20, max_y = 40;
+	int *status;
 	Printer *printer = new Printer(max_x, max_y);
 	Block *block = new Block(5, 5, 10, 5, max_x, max_y);
-	thread blockThread(blockThreadRun, block);
 
 	initscr();
 	cbreak();
@@ -46,6 +45,8 @@ int main(int argc, char *argv[])
 	nodelay(stdscr, TRUE);
 
 	int input = 0;
+	status = &input;
+	thread blockThread(blockThreadRun, block, status);
 	do
 	{
 		if (points.size() < 5)
@@ -56,18 +57,14 @@ int main(int argc, char *argv[])
 			symbolCounter++;
 			numberOfThreads++;
 		}
-
 		clear();
 		printer->printFrame(points, block);
-		mvprintw(0, 45, "threads.size() %i", threads.size());
-		mvprintw(1, 45, "points.size() %i", points.size());
-		mvprintw(3, 45, "dodano %c", symbolCounter - 1);
 		refresh();
 		usleep(DELAY);
-
 		input = getch();
-	} while (input != 'q');
-
+		status = &input;
+	} while (*status != 'q');
 	endwin();
+	blockThread.join();
 	return 0;
 }

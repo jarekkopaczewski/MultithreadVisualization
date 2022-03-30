@@ -3,13 +3,9 @@
 #include <iostream>
 using namespace std;
 
-Point::Point()
-{
-}
+Point::Point(){}
 
-Point::~Point()
-{
-}
+Point::~Point(){}
 
 Point::Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char symbol)
 {
