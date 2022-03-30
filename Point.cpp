@@ -27,15 +27,10 @@ void Point::run()
 {
     while (bounce != 5)
     {
-        refresh();
+        this->checkColision();
+        this->calcCords();
         usleep(50000 * delay);
     }
-}
-
-void Point::refresh()
-{
-    this->checkColision();
-    this->calcCords();
 }
 
 void Point::checkColision()
