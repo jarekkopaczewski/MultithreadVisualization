@@ -28,7 +28,8 @@ public:
     int x;
     int y;
     char symbol;
+    int color;
     Point();
-    Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char symbol);
+    Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char symbol, int color);
     void run();
 };

@@ -3,11 +3,11 @@
 #include <iostream>
 using namespace std;
 
-Point::Point(){}
+Point::Point() {}
 
-Point::~Point(){}
+Point::~Point() {}
 
-Point::Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char symbol)
+Point::Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char symbol, int color)
 {
     this->x = x;
     this->y = y;
@@ -17,6 +17,7 @@ Point::Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char 
     this->bounce = 0;
     this->delay = delay;
     this->symbol = symbol;
+    this->color = color;
 }
 
 void Point::run()

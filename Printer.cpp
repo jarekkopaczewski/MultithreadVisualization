@@ -15,6 +15,7 @@ void Printer::printFrame(vector<Point *> points, Block *block)
 
 void Printer::printBoard()
 {
+    wattron(stdscr, COLOR_PAIR(10));
     for (int y = 0; y <= max_y; y++)
     {
         mvprintw(0, y, "#");
@@ -26,10 +27,12 @@ void Printer::printBoard()
         mvprintw(x, 0, "#");
         mvprintw(x, max_y, "#");
     }
+    wattroff(stdscr, COLOR_PAIR(10));
 }
 
 void Printer::printBlock(Block *block)
 {
+    wattron(stdscr, COLOR_PAIR(11));
     for (int y = block->y; y <= (block->y + block->width); y++)
     {
         mvprintw(block->x, y, "@");
@@ -41,10 +44,15 @@ void Printer::printBlock(Block *block)
         mvprintw(x, block->y, "@");
         mvprintw(x, block->y + block->width, "@");
     }
+    wattroff(stdscr, COLOR_PAIR(11));
 }
 
 void Printer::printPoints(vector<Point *> points)
 {
     for (Point *point : points)
+    {
+        wattron(stdscr, COLOR_PAIR(point->color));
         mvprintw(point->x, point->y, "%c", point->symbol);
+        wattroff(stdscr, COLOR_PAIR(point->color));
+    }
 }
