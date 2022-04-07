@@ -20,34 +20,36 @@ Point::Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char 
     this->color = color;
 }
 
-void Point::run()
+void Point::run(bool &status)
 {
-    do
+    while (bounce <= 5)
     {
+        if (status)
+            break;
+        usleep(50000 * delay);
         this->checkColision();
         this->calcCords();
-        usleep(50000 * delay);
-    } while (bounce != 5);
+    }
 }
 
 void Point::checkColision()
 {
-    if (x == max_x - 1) // dol
+    if (x == max_x - 1) // bottom
     {
         dir = Generator::randomBottomDirection(2, 0);
         bounce++;
     }
-    else if (y == 1) // lewa sciana
+    else if (y == 1) // left border
     {
         dir = Generator::randomDirection(3, 1);
         bounce++;
     }
-    else if (y == max_y - 1) // prawa sciana
+    else if (y == max_y - 1) // right border
     {
         dir = Generator::randomDirection(3, 5);
         bounce++;
     }
-    else if (x == 1)
+    else if (x == 1) // top
     {
         dir = Generator::randomDirection(3, 3);
         bounce++;

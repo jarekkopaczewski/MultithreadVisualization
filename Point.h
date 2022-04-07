@@ -17,7 +17,6 @@ class Point
 private:
     int max_x;
     int max_y;
-    int bounce;
     int delay;
     Direction dir;
     ~Point();
@@ -29,7 +28,8 @@ public:
     int y;
     char symbol;
     int color;
+    int bounce;
     Point();
     Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char symbol, int color);
-    void run();
+    void run(bool &status);
 };

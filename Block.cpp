@@ -13,9 +13,9 @@ Block::Block(int x, int y, int width, int height, int max_x, int max_y)
     this->dir = Direction::N;
 }
 
-void Block::run(int *status)
+void Block::run(bool &status)
 {
-    while (*status != 'q')
+    while (!status)
     {
         this->checkColision();
         this->calcCords();

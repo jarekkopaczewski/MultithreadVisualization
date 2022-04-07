@@ -9,32 +9,22 @@
 using namespace std;
 
 #define DELAY 100000
+#define GENERATOR_DELAY 2500000
 vector<Point *> points;
 vector<thread *> threads;
 int numberOfThreads = 0;
 
-void pointThreadRun(Point *point, int threadId)
-{
-	thread *currentThread = threads[threadId];
-	point->run();
-	points.erase(find(points.begin(), points.end(), point));
-	threads.erase(find(threads.begin(), threads.end(), currentThread));
-	numberOfThreads--;
-	pthread_exit(0);
-}
-
-void blockThreadRun(Block *block, int *status)
-{
-	block->run(status);
-	pthread_exit(0);
-}
+void pointThreadRun(Point *, int, bool &);
+void blockThreadRun(Block *, bool &);
+void generatorRun(int, int, bool &);
+void iniColors();
 
 int main(int argc, char *argv[])
 {
 	srand(time(NULL));
-	char symbolCounter = 'a';
 	int max_x = 20, max_y = 40;
-	int *status;
+	bool status;
+	int input = 0;
 	Printer *printer = new Printer(max_x, max_y);
 	Block *block = new Block(5, 5, 10, 5, max_x, max_y);
 
@@ -45,6 +35,84 @@ int main(int argc, char *argv[])
 	nodelay(stdscr, TRUE);
 
 	start_color();
+	iniColors();
+
+	if (has_colors() == FALSE)
+	{
+		delete printer;
+		delete block;
+		endwin();
+		return 0;
+	}
+
+	// watek bloku
+	thread blockThread(blockThreadRun, block, ref(status));
+	// watek generujacy watki pilek
+	thread generatorThread(generatorRun, max_x, max_y, ref(status));
+
+	do
+	{
+		// wyswietlanie elementow symulacji
+		clear();
+		printer->printFrame(points, block);
+		refresh();
+		usleep(DELAY);
+
+		// wczytywanie znaku
+		input = getch();
+		if (input == 'q')
+			status = true;
+
+	} while (!status);
+
+	// wlaczenie join na uruchomionych watkach
+	generatorThread.join();
+	for (thread *t : threads)
+		t->join();
+	blockThread.join();
+
+	// czyszczenie pamieci
+	threads.clear();
+	points.clear();
+	delete printer;
+	delete block;
+
+	// koniec
+	endwin();
+	return 0;
+}
+
+void pointThreadRun(Point *point, int threadId, bool &status)
+{
+	thread *currentThread = threads[threadId];
+	point->run(status);
+	points.erase(find(points.begin(), points.end(), point));
+	threads.erase(find(threads.begin(), threads.end(), currentThread));
+	numberOfThreads--;
+}
+
+void blockThreadRun(Block *block, bool &status)
+{
+	block->run(status);
+}
+
+void generatorRun(int max_x, int max_y, bool &status)
+{
+	char symbolCounter = 'a';
+	while (!status)
+	{
+		Point *point = new Point(max_x - 1, max_y / 2, Generator::randomBottomDirection(7, 0), max_x, max_y, (rand() % 5 + 2), symbolCounter, (rand() % 9 + 0));
+
+		threads.push_back(new thread(pointThreadRun, point, numberOfThreads, ref(status)));
+		points.push_back(point);
+		symbolCounter++;
+		numberOfThreads++;
+		usleep(GENERATOR_DELAY);
+	}
+}
+
+void iniColors()
+{
 	init_pair(0, COLOR_GREEN, COLOR_BLACK);
 	init_pair(1, COLOR_YELLOW, COLOR_BLACK);
 	init_pair(2, COLOR_BLUE, COLOR_BLACK);
@@ -57,37 +125,4 @@ int main(int argc, char *argv[])
 	init_pair(9, COLOR_CYAN, COLOR_MAGENTA);
 	init_pair(10, COLOR_WHITE, COLOR_BLACK);
 	init_pair(11, COLOR_RED, COLOR_BLACK);
-
-	if (has_colors() == FALSE)
-	{
-		endwin();
-		cout << " No color support, program ends";
-		return 0;
-	}
-
-	int input = 0;
-	status = &input;
-	thread blockThread(blockThreadRun, block, status);
-	do
-	{
-		if (points.size() < 5)
-		{
-			Point *point = new Point(max_x - 1, max_y / 2, Generator::randomBottomDirection(7, 0), max_x, max_y, (rand() % 5 + 2), symbolCounter, (rand() % 9 + 0));
-			threads.push_back(new thread(pointThreadRun, point, numberOfThreads));
-			points.push_back(point);
-			symbolCounter++;
-			numberOfThreads++;
-		}
-
-		clear();
-		printer->printFrame(points, block);
-		refresh();
-		usleep(DELAY);
-		input = getch();
-		status = &input;
-	} while (*status != 'q');
-
-	endwin();
-	blockThread.join();
-	return 0;
 }
