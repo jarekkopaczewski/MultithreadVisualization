@@ -8,16 +8,22 @@
 #include "Block.cpp"
 using namespace std;
 
+// Pilki beda wpadaly do prostokata i zatrzymywac sie ( ruszac sie z  prostokatem ), jak wpadna 3 to odblokowuja sie i zaczynaja ruszac sie ponowanie. Po opuszczeniu
+// prostokat zaczyna znowu zbierac pilki
+
 #define DELAY 100000
 #define GENERATOR_DELAY 2500000
+#define CHECK_DELAY 1000
 vector<Point *> points;
 vector<thread *> threads;
+Block *block;
 int numberOfThreads = 0;
 
 void pointThreadRun(Point *, int, bool &);
 void blockThreadRun(Block *, bool &);
 void generatorRun(int, int, bool &);
 void iniColors();
+void checkColision(bool &);
 
 int main(int argc, char *argv[])
 {
@@ -26,10 +32,11 @@ int main(int argc, char *argv[])
 	bool status;
 	int input = 0;
 	Printer *printer = new Printer(max_x, max_y);
-	Block *block = new Block(5, 5, 10, 5, max_x, max_y);
+	block = new Block(5, 5, 10, 5, max_x, max_y);
 
 	initscr();
 	cbreak();
+
 	noecho();
 	curs_set(0);
 	nodelay(stdscr, TRUE);
@@ -50,6 +57,8 @@ int main(int argc, char *argv[])
 	// watek generujacy watki pilek
 	thread generatorThread(generatorRun, max_x, max_y, ref(status));
 
+	thread colisonCheck(checkColision, ref(status));
+
 	do
 	{
 		// wyswietlanie elementow symulacji
@@ -67,8 +76,11 @@ int main(int argc, char *argv[])
 
 	// wlaczenie join na uruchomionych watkach
 	generatorThread.join();
+	colisonCheck.join();
+
 	for (thread *t : threads)
 		t->join();
+
 	blockThread.join();
 
 	// czyszczenie pamieci
@@ -80,6 +92,34 @@ int main(int argc, char *argv[])
 	// koniec
 	endwin();
 	return 0;
+}
+
+void checkColision(bool &status)
+{
+	while (!status)
+	{
+		for (Point *point : points)
+		{
+			if (point->x > block->x &&
+				point->x < (block->x + block->height) &&
+				point->y > block->y &&
+				point->y < (block->y + block->width))
+			{
+				point->stop = true;
+				block->points.insert(point);
+			}
+		}
+
+		if (block->points.size() >= 3)
+		{
+			for (Point *point : block->points)
+				point->stop = false;
+			block->points.clear();
+			usleep(DELAY * 50);
+		}
+
+		usleep(CHECK_DELAY);
+	}
 }
 
 void pointThreadRun(Point *point, int threadId, bool &status)
@@ -102,7 +142,6 @@ void generatorRun(int max_x, int max_y, bool &status)
 	while (!status)
 	{
 		Point *point = new Point(max_x - 1, max_y / 2, Generator::randomBottomDirection(7, 0), max_x, max_y, (rand() % 5 + 2), symbolCounter, (rand() % 9 + 0));
-
 		threads.push_back(new thread(pointThreadRun, point, numberOfThreads, ref(status)));
 		points.push_back(point);
 		symbolCounter++;

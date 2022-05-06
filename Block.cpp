@@ -10,6 +10,7 @@ Block::Block(int x, int y, int width, int height, int max_x, int max_y)
     this->max_x = max_x;
     this->delay = 3;
     this->counter = 0;
+    this->stop = false;
     this->dir = Direction::N;
 }
 
@@ -17,9 +18,12 @@ void Block::run(bool &status)
 {
     while (!status)
     {
-        this->checkColision();
-        this->calcCords();
-        usleep(100000 * delay);
+        if (!stop)
+        {
+            this->checkColision();
+            this->calcCords();
+            usleep(100000 * delay);
+        }
     }
 }
 
@@ -29,9 +33,13 @@ void Block::calcCords()
     {
     case Direction::N:
         x--;
+        for (Point *point : points)
+            point->moveUp();
         break;
     case Direction::S:
         x++;
+        for (Point *point : points)
+            point->moveDown();
         break;
     default:
         break;

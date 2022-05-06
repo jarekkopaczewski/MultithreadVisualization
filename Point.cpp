@@ -18,6 +18,7 @@ Point::Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char 
     this->delay = delay;
     this->symbol = symbol;
     this->color = color;
+    this->stop = false;
 }
 
 void Point::run(bool &status)
@@ -26,9 +27,13 @@ void Point::run(bool &status)
     {
         if (status)
             break;
-        usleep(50000 * delay);
-        this->checkColision();
-        this->calcCords();
+
+        if (!stop)
+        {
+            usleep(50000 * delay);
+            this->checkColision();
+            this->calcCords();
+        }
     }
 }
 
@@ -54,6 +59,16 @@ void Point::checkColision()
         dir = Generator::randomDirection(3, 3);
         bounce++;
     }
+}
+
+void Point::moveUp()
+{
+    x--;
+}
+
+void Point::moveDown()
+{
+    x++;
 }
 
 void Point::calcCords()
