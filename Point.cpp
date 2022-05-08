@@ -31,8 +31,11 @@ void Point::run(bool &status)
         if (!stop)
         {
             usleep(50000 * delay);
-            this->checkColision();
-            this->calcCords();
+            if (!stop)
+            {
+                this->checkColision();
+                this->calcCords();
+            }
         }
     }
 }

@@ -32,7 +32,11 @@ void Printer::printBoard()
 
 void Printer::printBlock(Block *block)
 {
-    wattron(stdscr, COLOR_PAIR(11));
+    if (block->stop)
+        wattron(stdscr, COLOR_PAIR(11));
+    else
+        wattron(stdscr, COLOR_PAIR(9));
+
     for (int y = block->y; y <= (block->y + block->width); y++)
     {
         mvprintw(block->x, y, "@");
@@ -44,7 +48,10 @@ void Printer::printBlock(Block *block)
         mvprintw(x, block->y, "@");
         mvprintw(x, block->y + block->width, "@");
     }
-    wattroff(stdscr, COLOR_PAIR(11));
+    if (block->stop)
+        wattroff(stdscr, COLOR_PAIR(11));
+    else
+        wattroff(stdscr, COLOR_PAIR(9));
 }
 
 void Printer::printPoints(vector<Point *> points)

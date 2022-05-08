@@ -18,12 +18,9 @@ void Block::run(bool &status)
 {
     while (!status)
     {
-        if (!stop)
-        {
-            this->checkColision();
-            this->calcCords();
-            usleep(100000 * delay);
-        }
+        this->checkColision();
+        this->calcCords();
+        usleep(100000 * delay);
     }
 }
 

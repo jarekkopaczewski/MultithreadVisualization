@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	thread blockThread(blockThreadRun, block, ref(status));
 	// watek generujacy watki pilek
 	thread generatorThread(generatorRun, max_x, max_y, ref(status));
-
+	// watek sprawdzajacy kolizje
 	thread colisonCheck(checkColision, ref(status));
 
 	do
@@ -115,7 +115,9 @@ void checkColision(bool &status)
 			for (Point *point : block->points)
 				point->stop = false;
 			block->points.clear();
+			block->stop = true;
 			usleep(DELAY * 50);
+			block->stop = false;
 		}
 
 		usleep(CHECK_DELAY);
