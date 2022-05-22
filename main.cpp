@@ -3,21 +3,23 @@
 #include <vector>
 #include <thread>
 #include <algorithm>
-#include "Point.cpp"
+#include <mutex>
+#include <shared_mutex>
 #include "Printer.cpp"
-#include "Block.cpp"
+#include "BlockPoint.cpp"
 using namespace std;
 
-// Pilki beda wpadaly do prostokata i zatrzymywac sie ( ruszac sie z  prostokatem ), jak wpadna 3 to odblokowuja sie i zaczynaja ruszac sie ponowanie. Po opuszczeniu
-// prostokat zaczyna znowu zbierac pilki
+// Pilki beda wpadaly do prostokata i zatrzymywac sie ( ruszac sie z  prostokatem ), jak wpadna 3 to odblokowuja sie i zaczynaja ruszac sie ponowanie.
+// Po opuszczeniu prostokąt zaczyna po jakimś czasie znowu zbierać piłki.
 
 #define DELAY 100000
 #define GENERATOR_DELAY 2500000
-#define CHECK_DELAY 1000
 vector<Point *> points;
 vector<thread *> threads;
 Block *block;
 int numberOfThreads = 0;
+mutex pointLocker;
+shared_ptr<condition_variable> con{make_shared<condition_variable>()};
 
 void pointThreadRun(Point *, int, bool &);
 void blockThreadRun(Block *, bool &);
@@ -32,7 +34,7 @@ int main(int argc, char *argv[])
 	bool status;
 	int input = 0;
 	Printer *printer = new Printer(max_x, max_y);
-	block = new Block(5, 5, 10, 5, max_x, max_y);
+	block = new Block(5, 5, 10, 5, max_x, max_y, ref(pointLocker), con);
 
 	initscr();
 	cbreak();
@@ -42,6 +44,7 @@ int main(int argc, char *argv[])
 	nodelay(stdscr, TRUE);
 
 	start_color();
+
 	iniColors();
 
 	if (has_colors() == FALSE)
@@ -56,8 +59,6 @@ int main(int argc, char *argv[])
 	thread blockThread(blockThreadRun, block, ref(status));
 	// watek generujacy watki pilek
 	thread generatorThread(generatorRun, max_x, max_y, ref(status));
-	// watek sprawdzajacy kolizje
-	thread colisonCheck(checkColision, ref(status));
 
 	do
 	{
@@ -76,7 +77,6 @@ int main(int argc, char *argv[])
 
 	// wlaczenie join na uruchomionych watkach
 	generatorThread.join();
-	colisonCheck.join();
 
 	for (thread *t : threads)
 		t->join();
@@ -92,36 +92,6 @@ int main(int argc, char *argv[])
 	// koniec
 	endwin();
 	return 0;
-}
-
-void checkColision(bool &status)
-{
-	while (!status)
-	{
-		for (Point *point : points)
-		{
-			if (point->x > block->x &&
-				point->x < (block->x + block->height) &&
-				point->y > block->y &&
-				point->y < (block->y + block->width))
-			{
-				point->stop = true;
-				block->points.insert(point);
-			}
-		}
-
-		if (block->points.size() >= 3)
-		{
-			for (Point *point : block->points)
-				point->stop = false;
-			block->points.clear();
-			block->stop = true;
-			usleep(DELAY * 50);
-			block->stop = false;
-		}
-
-		usleep(CHECK_DELAY);
-	}
 }
 
 void pointThreadRun(Point *point, int threadId, bool &status)
@@ -143,7 +113,7 @@ void generatorRun(int max_x, int max_y, bool &status)
 	char symbolCounter = 'a';
 	while (!status)
 	{
-		Point *point = new Point(max_x - 1, max_y / 2, Generator::randomBottomDirection(7, 0), max_x, max_y, (rand() % 5 + 2), symbolCounter, (rand() % 9 + 0));
+		Point *point = new Point(max_x - 1, max_y / 2, Generator::randomBottomDirection(7, 0), max_x, max_y, (rand() % 5 + 2), symbolCounter, (rand() % 9 + 0), block, ref(pointLocker), con);
 		threads.push_back(new thread(pointThreadRun, point, numberOfThreads, ref(status)));
 		points.push_back(point);
 		symbolCounter++;

@@ -1,6 +1,5 @@
 #include <vector>
-#include "Point.h"
-#include "Block.h"
+#include "BlockPoint.h"
 
 class Printer
 {
