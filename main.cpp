@@ -12,6 +12,9 @@ using namespace std;
 // Pilki beda wpadaly do prostokata i zatrzymywac sie ( ruszac sie z  prostokatem ), jak wpadna 3 to odblokowuja sie i zaczynaja ruszac sie ponowanie.
 // Po opuszczeniu prostokąt zaczyna po jakimś czasie znowu zbierać piłki.
 
+// Zmienna wyswietlajaca sredni czas przebywania kulek w prostokacie.
+// Wyliczanie tylko jak gina kulki
+
 #define DELAY 100000
 #define GENERATOR_DELAY 2500000
 vector<Point *> points;
@@ -113,7 +116,7 @@ void generatorRun(int max_x, int max_y, bool &status)
 	char symbolCounter = 'a';
 	while (!status)
 	{
-		Point *point = new Point(max_x - 1, max_y / 2, Generator::randomBottomDirection(7, 0), max_x, max_y, (rand() % 5 + 2), symbolCounter, (rand() % 9 + 0), block, ref(pointLocker), con);
+		Point *point = new Point(max_x - 1, max_y / 2, Generator::randomBottomDirection(7, 0), max_x, max_y, (rand() % 7 + 4), symbolCounter, (rand() % 9 + 0), block, ref(pointLocker), con);
 		threads.push_back(new thread(pointThreadRun, point, numberOfThreads, ref(status)));
 		points.push_back(point);
 		symbolCounter++;

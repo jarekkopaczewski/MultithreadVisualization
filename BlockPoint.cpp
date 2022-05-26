@@ -5,10 +5,12 @@
 #include <shared_mutex>
 using namespace std;
 
-condition_variable con2;
 bool ready = false;
+condition_variable con2;
 
-Point::~Point() {}
+    Point::~Point()
+{
+}
 
 Point::Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char symbol, int color, Block *block, mutex &pointBlock, shared_ptr<condition_variable> con) : pointBlock(pointBlock), con(con)
 {
@@ -51,8 +53,7 @@ void Point::checkBlockColision()
     {
         this->block->points.insert(this);
         unique_lock<mutex> locker(pointBlock);
-        con2.wait(locker, []
-                  { return ready; });
+        con->wait(locker, []{ return ready; });
         locker.unlock();
     }
 }
@@ -170,9 +171,8 @@ void Block::run(bool &status)
         {
             locker.unlock();
             ready = true;
-            con2.notify_all();
+            con->notify_all();
             this->points.clear();
-
             this->stop = true;
 
             for (int i = 0; i < 5; i++)
