@@ -12,5 +12,5 @@ private:
 
 public:
     Printer(int max_x, int max_y);
-    void printFrame(vector<Point *> points, Block *block);
+    void printFrame(vector<Point *> points, Block *block, int avg);
 };

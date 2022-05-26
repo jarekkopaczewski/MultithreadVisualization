@@ -66,6 +66,7 @@ public:
     atomic<int> y;
     char symbol;
     int color;
+    int duration;
     int bounce;
     Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char symbol, int color, Block *block, mutex &pointBlock, shared_ptr<condition_variable> con);
     void run(bool &status);

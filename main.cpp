@@ -21,6 +21,9 @@ vector<Point *> points;
 vector<thread *> threads;
 Block *block;
 int numberOfThreads = 0;
+int deadCount = 0;
+int allTime = 0;
+int avg = 0;
 mutex pointLocker;
 shared_ptr<condition_variable> con{make_shared<condition_variable>()};
 
@@ -67,7 +70,7 @@ int main(int argc, char *argv[])
 	{
 		// wyswietlanie elementow symulacji
 		clear();
-		printer->printFrame(points, block);
+		printer->printFrame(points, block, avg);
 		refresh();
 		usleep(DELAY);
 
@@ -101,6 +104,13 @@ void pointThreadRun(Point *point, int threadId, bool &status)
 {
 	thread *currentThread = threads[threadId];
 	point->run(status);
+
+	// calc time in block
+	allTime += point->duration;
+	deadCount++;
+
+	avg = (double)allTime / deadCount;
+
 	points.erase(find(points.begin(), points.end(), point));
 	threads.erase(find(threads.begin(), threads.end(), currentThread));
 	numberOfThreads--;

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <condition_variable>
 #include <shared_mutex>
+#include <chrono>
 using namespace std;
 
 bool ready = false;
@@ -25,6 +26,7 @@ Point::Point(int x, int y, Direction dir, int max_x, int max_y, int delay, char 
     this->color = color;
     this->stop = false;
     this->block = block;
+    this->duration = 0;
 }
 
 void Point::run(bool &status)
@@ -52,8 +54,13 @@ void Point::checkBlockColision()
         this->y < (this->block->y + this->block->width))
     {
         this->block->points.insert(this);
+        auto t1 = std::chrono::high_resolution_clock::now();
+
         unique_lock<mutex> locker(pointBlock);
         con->wait(locker, []{ return ready; });
+
+        auto t2 = std::chrono::high_resolution_clock::now();
+        this->duration += std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
         locker.unlock();
     }
 }

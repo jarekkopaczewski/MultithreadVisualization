@@ -6,11 +6,12 @@ Printer::Printer(int max_x, int max_y)
     this->max_y = max_y;
 }
 
-void Printer::printFrame(vector<Point *> points, Block *block)
+void Printer::printFrame(vector<Point *> points, Block *block, int avg)
 {
     printBoard();
     printBlock(block);
     printPoints(points);
+    mvprintw(0, this->max_y + 2, "Sredni czas w bloku[ms]: %i", avg);
 }
 
 void Printer::printBoard()
