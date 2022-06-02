@@ -54,13 +54,15 @@ void Point::checkBlockColision()
         this->y < (this->block->y + this->block->width))
     {
         this->block->points.insert(this);
-        auto t1 = std::chrono::high_resolution_clock::now();
+
+        auto start = std::chrono::high_resolution_clock::now();
 
         unique_lock<mutex> locker(pointBlock);
         con->wait(locker, []{ return ready; });
 
-        auto t2 = std::chrono::high_resolution_clock::now();
-        this->duration += std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+        auto end = std::chrono::high_resolution_clock::now();
+        this->duration += std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
         locker.unlock();
     }
 }

@@ -25,6 +25,7 @@ int deadCount = 0;
 int allTime = 0;
 int avg = 0;
 mutex pointLocker;
+mutex add;
 shared_ptr<condition_variable> con{make_shared<condition_variable>()};
 
 void pointThreadRun(Point *, int, bool &);
@@ -105,11 +106,14 @@ void pointThreadRun(Point *point, int threadId, bool &status)
 	thread *currentThread = threads[threadId];
 	point->run(status);
 
-	// calc time in block
+	add.lock();
+	// dodaj czas bloku do globalnego czasu
 	allTime += point->duration;
+	// inkrementacja zakonczonych watkow kulek
 	deadCount++;
-
+	// obliczenie nowej sredniej
 	avg = (double)allTime / deadCount;
+	add.unlock();
 
 	points.erase(find(points.begin(), points.end(), point));
 	threads.erase(find(threads.begin(), threads.end(), currentThread));
@@ -126,7 +130,7 @@ void generatorRun(int max_x, int max_y, bool &status)
 	char symbolCounter = 'a';
 	while (!status)
 	{
-		Point *point = new Point(max_x - 1, max_y / 2, Generator::randomBottomDirection(7, 0), max_x, max_y, (rand() % 7 + 4), symbolCounter, (rand() % 9 + 0), block, ref(pointLocker), con);
+		Point *point = new Point(max_x - 1, max_y / 2, Generator::randomBottomDirection(7, 0), max_x, max_y, (rand() % 6 + 2), symbolCounter, (rand() % 9 + 0), block, ref(pointLocker), con);
 		threads.push_back(new thread(pointThreadRun, point, numberOfThreads, ref(status)));
 		points.push_back(point);
 		symbolCounter++;
